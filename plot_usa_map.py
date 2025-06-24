@@ -4,11 +4,24 @@ def plot_usa_map():
     import numpy as np
     import pandas as pd
     import plotly.express as px
-    with open("/workspaces/greener/static/greener/usa.geojson") as f:
-        counties = json.load(f)
+    from download_data import download_data
+    try:
+        with open("static/greener/usa.geojson") as f:
+            counties = json.load(f)
+    except:
+        download_data('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json',
+                    "static/greener/usa.geojson")
+        with open("static/greener/usa.geojson") as f:
+            counties = json.load(f)
 
-        
-    housing = pd.read_csv("/workspaces/greener/static/greener/home_values_county.csv")
+
+    try:    
+        housing = pd.read_csv("static/greener/home_values_county.csv")
+    except:
+        download_data("https://files.zillowstatic.com/research/public_csvs/zhvi/County_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv?t=1750261630",
+                      "static/greener/home_values_county.csv")
+        housing = pd.read_csv("static/greener/home_values_county.csv")
+
     # Ensure StateCodeFIPS is in two digit format and MunicipalCodeFIPS is in 3 digit format.
     housing["StateCodeFIPS"] = housing["StateCodeFIPS"].apply(lambda x: str(x).zfill(2))
     housing["MunicipalCodeFIPS"] = housing['MunicipalCodeFIPS'].apply(lambda x: str(x).zfill(3))

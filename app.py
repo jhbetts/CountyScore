@@ -1,6 +1,7 @@
 from dash import Dash, html, dcc, Output, Input, callback, dash_table
 from plot_usa_map import plot_usa_map
 import json
+
 app = Dash()
 
 app.layout = [
