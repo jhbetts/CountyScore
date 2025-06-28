@@ -1,10 +1,7 @@
-
-def plot_usa_map():
-    import json
-    import numpy as np
-    import pandas as pd
-    import plotly.express as px
+def get_map():
     from download_data import download_data
+    import json
+
     try:
         with open("static/greener/usa.geojson") as f:
             counties = json.load(f)
@@ -13,8 +10,12 @@ def plot_usa_map():
                     "static/greener/usa.geojson")
         with open("static/greener/usa.geojson") as f:
             counties = json.load(f)
+    return counties
 
-
+def get_homes():
+    from download_data import download_data
+    import numpy as np
+    import pandas as pd
     try:    
         housing = pd.read_csv("static/greener/home_values_county.csv")
     except:
@@ -40,6 +41,16 @@ def plot_usa_map():
 
     # Normalize the values in a new column.
     housing["NormalizedValues"]= np.log10(housing['AverageHomeValue']) 
+
+    return housing
+
+def plot_usa_map(map, homes):
+    import plotly.express as px
+
+    counties = map
+
+    housing = homes
+
     fig = px.choropleth_map(housing, geojson=counties, locations="fips", color="NormalizedValues",
                             color_continuous_scale='greens',
                             # range_color=(min_value, max_value),
@@ -53,4 +64,3 @@ def plot_usa_map():
     fig.update_layout(margin={"r":0,"l":0,"t":0,"b":0})
     fig.update_coloraxes(showscale=False)
     return fig
-plot_usa_map()
