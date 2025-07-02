@@ -25,8 +25,8 @@ def plot_usa_map(map, data):
                             opacity=1.0,
                             title="Average Home Value By County", 
                             hover_name="RegionName",
-                            hover_data={'AverageHomeValue': ':,.2f', 'fips': False, "NormalizedValues": False},
-                            custom_data=["RegionName","AverageHomeValue", "fips"])
+                            hover_data={'fips': False, "NormalizedValues": False},
+                            custom_data=["RegionName", "StateName", "AverageHomeValue", "Houses", 'Unemployment_rate_2023', 'Median_Household_Income_2022', "WinterAvg", "SummerAvg", "fips"])
     fig.update_layout(margin={"r":0,"l":0,"t":0,"b":0})
     fig.update_coloraxes(showscale=True)
     return fig

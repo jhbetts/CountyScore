@@ -54,7 +54,12 @@ def get_homes():
     housing = housing[['fips', 'StateName', "RegionName", 'AverageHomeValue']]
 
     # Normalize the values in a new column.
-    housing["NormalizedValues"]= np.log10(housing['AverageHomeValue']) 
+    housing["NormalizedValues"]= np.log10(housing['AverageHomeValue'])
+
+    # Create zillow url
+    houses_url_base = 'https://www.zillow.com/'
+    housing['Houses'] = housing.apply(lambda row: f'{houses_url_base}{row["RegionName"].replace(" ", "-")}-{row['StateName']}', axis=1)
+
 
     return housing
 
@@ -145,7 +150,7 @@ def compile_data():
     joined = pd.merge(housing, winter, right_on=["Name", 'State'], left_on=['RegionName', 'StateName'], how='left')
     joined.drop(columns=['Name', 'State'], inplace=True)
     codes = joined['fips'].unique()
-    unemploy = get_unemployment('static/greener/unemployment_hhi_2000-23',"https://ers.usda.gov/sites/default/files/_laserfiche/DataFiles/48747/Unemployment2023.csv?v=67344")
+    unemploy = get_unemployment('static/greener/unemployment_hhi_2000-23.csv',"https://ers.usda.gov/sites/default/files/_laserfiche/DataFiles/48747/Unemployment2023.csv?v=67344")
     # Possibly replace with merge
     # unemploy = unemploy[unemploy.index.isin(codes)]
     joined = joined.merge(unemploy, on='fips', how='left')
