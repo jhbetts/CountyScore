@@ -1,11 +1,15 @@
 from dash import Dash, html, dcc, Output, Input, callback, dash_table
-from plot_usa_map import plot_usa_map, get_map, get_homes
+from plot_usa_map import plot_usa_map, get_map
 import dash_bootstrap_components as dbc
+import pandas as pd
 from urllib.parse import urlencode
-app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = Dash(external_stylesheets=[dbc.themes.FLATLY])
 
 counties = get_map()
-homes = get_homes()
+county_data = pd.read_parquet("static/greener/compiled_data.parquet")
+test = 'test'
+
+
 
 app.layout = html.Div([
     dcc.Store(id='selected-county'),
@@ -14,12 +18,12 @@ app.layout = html.Div([
     html.Div(
         [
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=plot_usa_map(counties, homes), id='map'),width=8),
+                dbc.Col(dcc.Graph(figure=plot_usa_map(counties, county_data), id='map'),width=8),
                 # dbc.Col(dash_table.DataTable(id='click-data'), width=4)
                 dbc.Col(dbc.Card([html.Div('State:', id='state-name'),
-                                  html.Div('County:', id='county-name'),
-                                  html.Div('Average Home Values:', id='home-values'),
-                                  html.Div(children=[html.A(children='zillow',id='zillow-url')])],
+                                html.Div('County:', id='county-name'),
+                                html.Div('Average Home Values:', id='home-values'),
+                                html.Div(children=[html.A(children='zillow',id='zillow-url')])],
                                     id='county-card'), width=4)
             ])
         ]
@@ -70,7 +74,7 @@ def update_table(county):
 
     houses_url_base = 'https://www.zillow.com/'
     if county:
-        data = homes[homes.fips == county]
+        data = county_data[county_data.fips == county]
         data = data[['StateName', 'RegionName', 'AverageHomeValue']]
         county_formatted = data.iloc[0]["RegionName"].replace(" ", "-")
         data['Houses'] = f'{houses_url_base}{county_formatted}-{data.iloc[0]['StateName']}'
