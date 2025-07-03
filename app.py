@@ -30,9 +30,17 @@ test = 'test'
 
 dropdown = html.Div([
     dcc.Dropdown(
-        options = {'AverageHomeValue':'Home Values','Median_Household_Income_2022': 'Median Household Income',"SummerAvg": 'Avg. Summer Temp.',"WinterAvg": 'Avg. Winter Temp.'},
-        value = 'AverageHomeValue',
-        id='criteria-drop')
+        options = {
+            'HousingScore':'Home Values',
+            'IncomeScore': 'Median Household Income',
+            "UnemploymentScore": "Unemployment Rate",
+            # "SummerAvg": 'Avg. Summer Temp.',
+            # "WinterAvg": 'Avg. Winter Temp.'
+            },
+        value = 'HousingScore',
+        id='criteria-drop',
+        multi=True,
+        placeholder="Select Your Criteria")
 ])
 
 list_group = dbc.ListGroup(
@@ -55,26 +63,25 @@ app.layout = html.Div([
     dcc.Store(id='selected-county'),
     dcc.Store(id='county-data'),
     html.H1(children="Greener", id = 'title'),
-    dropdown,
     html.Div(
         [
             dbc.Row([
-                dbc.Col(dcc.Graph(figure=plot_usa_map(counties, county_data), id='map'),width=8),
-                dbc.Col(list_group
-                                    )
+                dbc.Col([dropdown,dcc.Graph(figure=plot_usa_map(counties, county_data, [["HousingScore"]]), id='map')],width={'size':8}),
+                dbc.Col(list_group, width=4)
             ])
         ]
     ),
     # html.Div(id='click-data')
 ],)
 
+# Dropdown
 @callback(
-        Output("title",'children'),
+        Output("map",'figure'),
         Input("criteria-drop", 'value')
 )
 def update_criteria(value):
-
-    return str(value)
+    value = value
+    return plot_usa_map(counties, county_data, [value])
 
 # Clicking county on map updates 'selected-county' Store item with the fips code of the county selected.
 @callback(
@@ -106,6 +113,8 @@ def display_click_data(clickData):
         results = (county, state, avg_home, zillow, zillow, unemploy, hhi, avg_summer, avg_winter)
         return results
     else:
-        return
+        return ('','','','','','','','','')
+
+
 if __name__ == '__main__':
     app.run(debug=True)

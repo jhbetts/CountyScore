@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-
+from sklearn.preprocessing import MinMaxScaler
 
 def download_data(url,filename):
     from urllib.request import urlretrieve
@@ -54,13 +54,11 @@ def get_homes():
     housing = housing[['fips', 'StateName', "RegionName", 'AverageHomeValue']]
 
     # Normalize the values in a new column.
-    housing["NormalizedValues"]= np.log10(housing['AverageHomeValue'])
-
+    scaler = MinMaxScaler()
+    housing['HousingScore'] = 1 - scaler.fit_transform(np.log10(housing[["AverageHomeValue"]]))
     # Create zillow url
     houses_url_base = 'https://www.zillow.com/'
     housing['Houses'] = housing.apply(lambda row: f'{houses_url_base}{row["RegionName"].replace(" ", "-")}-{row['StateName']}', axis=1)
-
-
     return housing
 
 def get_temps(filename, url):
@@ -134,6 +132,9 @@ def get_unemployment(filename, url):
     df['FIPS_Code'] = df['FIPS_Code'].apply(lambda x: str(x).zfill(5))
     df = df[df['Attribute'].isin(['Unemployment_rate_2023', 'Median_Household_Income_2022'])]
     df = df.pivot(index='FIPS_Code', columns='Attribute', values='Value')
+    scaler = MinMaxScaler()
+    df['IncomeScore'] = scaler.fit_transform(np.log10(df[['Median_Household_Income_2022']]))
+    df['UnemploymentScore'] = 1 - scaler.fit_transform(np.log10(df[['Unemployment_rate_2023']]))
     df.index.names=['fips']
     return df
 
@@ -155,4 +156,5 @@ def compile_data():
     # unemploy = unemploy[unemploy.index.isin(codes)]
     joined = joined.merge(unemploy, on='fips', how='left')
     joined.to_parquet('static/greener/compiled_data.parquet')
+
 compile_data()
