@@ -1,5 +1,5 @@
 from dash import Dash, html, dcc, Output, Input, callback, dash_table
-from plot_usa_map import plot_usa_map, get_map
+from plot_graphs import plot_usa_map, get_map, plot_top_ten
 import dash_bootstrap_components as dbc
 import pandas as pd
 from urllib.parse import urlencode
@@ -68,6 +68,9 @@ app.layout = html.Div([
             dbc.Row([
                 dbc.Col([dropdown,dcc.Graph(figure=plot_usa_map(counties, county_data, [["HousingScore"]]), id='map')],width={'size':8}),
                 dbc.Col(list_group, width=4)
+            ]),
+            dbc.Row([
+                dcc.Graph(figure = plot_top_ten(county_data, [['HousingScore']]), id='top-ten')
             ])
         ]
     ),
@@ -77,11 +80,12 @@ app.layout = html.Div([
 # Dropdown
 @callback(
         Output("map",'figure'),
+        Output("top-ten", 'figure'),
         Input("criteria-drop", 'value')
 )
 def update_criteria(value):
     value = value
-    return plot_usa_map(counties, county_data, [value])
+    return (plot_usa_map(counties, county_data, [value]), plot_top_ten(county_data, [value]))
 
 # Clicking county on map updates 'selected-county' Store item with the fips code of the county selected.
 @callback(
