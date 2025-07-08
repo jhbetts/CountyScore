@@ -69,7 +69,7 @@ def plot_usa_map(map, data, columns):
 
 
 def ai_copy(county,state):
-    client = genai.Client(api_key='AIzaSyDHrNhMg06HmoLfJvYKP_Trv7lIMwfVheM')
+    client = genai.Client(api_key=)
 
     response = client.models.generate_content(
         model='gemini-2.5-flash', 
