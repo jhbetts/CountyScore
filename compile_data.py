@@ -1,7 +1,67 @@
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
-import urllib.parse
+
+us_state_to_abbrev = {
+    "Alabama": "AL",
+    "Alaska": "AK",
+    "Arizona": "AZ",
+    "Arkansas": "AR",
+    "California": "CA",
+    "Colorado": "CO",
+    "Connecticut": "CT",
+    "Delaware": "DE",
+    "Florida": "FL",
+    "Georgia": "GA",
+    "Hawaii": "HI",
+    "Idaho": "ID",
+    "Illinois": "IL",
+    "Indiana": "IN",
+    "Iowa": "IA",
+    "Kansas": "KS",
+    "Kentucky": "KY",
+    "Louisiana": "LA",
+    "Maine": "ME",
+    "Maryland": "MD",
+    "Massachusetts": "MA",
+    "Michigan": "MI",
+    "Minnesota": "MN",
+    "Mississippi": "MS",
+    "Missouri": "MO",
+    "Montana": "MT",
+    "Nebraska": "NE",
+    "Nevada": "NV",
+    "New Hampshire": "NH",
+    "New Jersey": "NJ",
+    "New Mexico": "NM",
+    "New York": "NY",
+    "North Carolina": "NC",
+    "North Dakota": "ND",
+    "Ohio": "OH",
+    "Oklahoma": "OK",
+    "Oregon": "OR",
+    "Pennsylvania": "PA",
+    "Rhode Island": "RI",
+    "South Carolina": "SC",
+    "South Dakota": "SD",
+    "Tennessee": "TN",
+    "Texas": "TX",
+    "Utah": "UT",
+    "Vermont": "VT",
+    "Virginia": "VA",
+    "Washington": "WA",
+    "West Virginia": "WV",
+    "Wisconsin": "WI",
+    "Wyoming": "WY",
+    "District of Columbia": "DC",
+    "American Samoa": "AS",
+    "Guam": "GU",
+    "Northern Mariana Islands": "MP",
+    "Puerto Rico": "PR",
+    "United States Minor Outlying Islands": "UM",
+    "Virgin Islands, U.S.": "VI",
+}
+
 
 def download_data(url,filename):
     from urllib.request import urlretrieve
@@ -19,6 +79,20 @@ def open_csv_data(filename, url):
         download_data(url, filename)
         x = pd.read_csv(filename, comment="#")
     return x
+
+def get_pop():
+    df = pd.read_excel("https://www2.census.gov/programs-surveys/popest/tables/2020-2024/counties/totals/co-est2024-pop.xlsx", usecols='A,G',skiprows=4, names=['Region','Pop_Est_July_1_2024'])
+    df['Region'] = df['Region'].apply(lambda x: str(x).replace('.',''))
+    df[["County", "State"]] = df["Region"].str.split(",", expand=True, n=1)
+    df.drop("Region", axis=1,inplace=True)
+    df['State'] = df['State'].str.strip()
+    df['State'] = df['State'].replace(us_state_to_abbrev)
+    df.dropna(inplace=True)
+    df['Pop_Est_July_1_2024'] = df['Pop_Est_July_1_2024'].astype(int)
+    scaler = MinMaxScaler()
+    df['Low_Pop_Score'] = 1 - scaler.fit_transform(np.log10(df[["Pop_Est_July_1_2024"]]))
+    df['High_Pop_Score'] = scaler.fit_transform(np.log10(df[["Pop_Est_July_1_2024"]]))
+    return df
 
 
 def get_map():
@@ -63,69 +137,14 @@ def get_homes():
     return housing
 
 def get_temps(filename, url):
-    us_state_to_abbrev = {
-        "Alabama": "AL",
-        "Alaska": "AK",
-        "Arizona": "AZ",
-        "Arkansas": "AR",
-        "California": "CA",
-        "Colorado": "CO",
-        "Connecticut": "CT",
-        "Delaware": "DE",
-        "Florida": "FL",
-        "Georgia": "GA",
-        "Hawaii": "HI",
-        "Idaho": "ID",
-        "Illinois": "IL",
-        "Indiana": "IN",
-        "Iowa": "IA",
-        "Kansas": "KS",
-        "Kentucky": "KY",
-        "Louisiana": "LA",
-        "Maine": "ME",
-        "Maryland": "MD",
-        "Massachusetts": "MA",
-        "Michigan": "MI",
-        "Minnesota": "MN",
-        "Mississippi": "MS",
-        "Missouri": "MO",
-        "Montana": "MT",
-        "Nebraska": "NE",
-        "Nevada": "NV",
-        "New Hampshire": "NH",
-        "New Jersey": "NJ",
-        "New Mexico": "NM",
-        "New York": "NY",
-        "North Carolina": "NC",
-        "North Dakota": "ND",
-        "Ohio": "OH",
-        "Oklahoma": "OK",
-        "Oregon": "OR",
-        "Pennsylvania": "PA",
-        "Rhode Island": "RI",
-        "South Carolina": "SC",
-        "South Dakota": "SD",
-        "Tennessee": "TN",
-        "Texas": "TX",
-        "Utah": "UT",
-        "Vermont": "VT",
-        "Virginia": "VA",
-        "Washington": "WA",
-        "West Virginia": "WV",
-        "Wisconsin": "WI",
-        "Wyoming": "WY",
-        "District of Columbia": "DC",
-        "American Samoa": "AS",
-        "Guam": "GU",
-        "Northern Mariana Islands": "MP",
-        "Puerto Rico": "PR",
-        "United States Minor Outlying Islands": "UM",
-        "Virgin Islands, U.S.": "VI",
-    }
     temps = open_csv_data(filename,url)
     temps = temps[['Name', 'Value', 'State']]
     temps['State'] = temps['State'].replace(us_state_to_abbrev)
     temps = temps[['Name', 'Value', 'State']]
+    scaler = MinMaxScaler()
+    temps['Low_Temp_Score'] = 1 - scaler.fit_transform(np.log10(temps[["Value"]]))
+    temps['High_Temp_Score'] = scaler.fit_transform(np.log10(temps[["Value"]]))
+
     return temps
 
 def get_unemployment(filename, url):
@@ -144,10 +163,10 @@ def compile_data():
     housing = get_homes()
     winter = get_temps("static/greener/dec_feb_temps.csv",
                         "https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/county/mapping/110-tavg-202412-3.csv")
-    winter.rename(columns={"Value":"WinterAvg"}, inplace=True)
+    winter.rename(columns={"Value":"WinterAvg", "High_Temp_Score": "Winter_High_Temp_Score", "Low_Temp_Score": "Winter_Low_Temp_Score"}, inplace=True)
     summer = get_temps("static/greener/jun_aug_temps.csv",
                     "https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/county/mapping/110-tavg-202408-3.csv")
-    summer.rename(columns={"Value": "SummerAvg"}, inplace=True)
+    summer.rename(columns={"Value": "SummerAvg", "High_Temp_Score": "Summer_High_Temp_Score", "Low_Temp_Score": "Summer_Low_Temp_Score"}, inplace=True)
     winter = winter.merge(summer)
     joined = pd.merge(housing, winter, right_on=["Name", 'State'], left_on=['RegionName', 'StateName'], how='left')
     joined.drop(columns=['Name', 'State'], inplace=True)
@@ -158,7 +177,10 @@ def compile_data():
     joined = joined.merge(unemploy, on='fips', how='left')
     jobs_url_base = 'https://www.indeed.com/jobs?q=&l='
     joined['Jobs'] = housing.apply(lambda row: f'{jobs_url_base}{row["RegionName"].replace(" ", "+")}%2C+{row['StateName']}', axis=1)
-
+    joined['Summary']=None
+    pop = get_pop()
+    joined = joined.merge(pop, left_on=['RegionName', "StateName"], right_on=['County', 'State'], how='left')
+    joined.drop(columns=['County', 'State'], inplace=True)
     joined.to_parquet('static/greener/compiled_data.parquet')
 
 compile_data()

@@ -1,8 +1,8 @@
 from dash import Dash, html, dcc, Output, Input, callback, ctx
-from plot_graphs import plot_usa_map, get_map, plot_top_ten
+from helpers import plot_usa_map, get_map, plot_top_ten, ai_copy
 import dash_bootstrap_components as dbc
 import pandas as pd
-from urllib.parse import urlencode
+# from urllib.parse import urlencode
 
 app = Dash(external_stylesheets=[dbc.themes.SLATE, 'static/greener/style.css'])
 
@@ -11,15 +11,18 @@ county_data = pd.read_parquet("static/greener/compiled_data.parquet")
 
 dropdown = html.Div([
     dcc.Dropdown(
-        options = {
-            'HousingScore':'Home Values',
-            'IncomeScore': 'Median Household Income',
-            "UnemploymentScore": "Unemployment Rate",
-            # "SummerAvg": 'Avg. Summer Temp.',
-            # "WinterAvg": 'Avg. Winter Temp.'
-            },
+        [
+            {'label': "Low Home Prices", 'value': 'HousingScore', 'disabled':False},
+            {'label': "High Income", 'value': 'IncomeScore', 'disabled':False},
+            {'label': "Low Unemployment", 'value': 'UnemploymentScore', 'disabled':False},
+            {'label': "Warm Summers", 'value': 'Summer_High_Temp_Score', 'disabled':False},
+            {'label': "Cool Summers", 'value': 'Summer_Low_Temp_Score', 'disabled':False},
+            {'label': "Warm Winters", 'value': 'Winter_High_Temp_Score', 'disabled':False},
+            {'label': "Cool Winters", 'value': 'Winter_Low_Temp_Score', 'disabled':False},
+        ],
         value = 'HousingScore',
         id='criteria-drop',
+        # closeOnSelect=False // Only available in Dash 3.1, which breaks the map,
         multi=True,
         placeholder="Select Your Criteria", 
         style={
@@ -35,6 +38,7 @@ list_group = dbc.ListGroup(
     [
         dbc.ListGroupItem([html.Span(children="County"), html.Span(id='county-name', style={'float': 'right'})]),
         dbc.ListGroupItem([html.Span(children="State"), html.Span(id='state-name', style={'float': 'right'})]),
+        dbc.ListGroupItem([html.Span(children="Population"), html.Span(id='population', style={'float': 'right'})]),
         dbc.ListGroupItem([html.Span(children="Average Home Value"), html.Span(id='home-values', style={'float': 'right'})]),
         dbc.ListGroupItem([html.Span(children="Zillow"), html.A(id='zillow-url', style={'float': 'right'}, target='_blank')]),
         dbc.ListGroupItem([html.Span(children="Median Household Income"), html.Span(id='hhi', style={'float': 'right'})]),
@@ -45,7 +49,12 @@ list_group = dbc.ListGroup(
     ],
 )
 
-
+info_card = dbc.Card(
+    [
+        list_group,
+        html.P(id="ai-output")
+    ]
+)
 
 app.layout = html.Div([
     dcc.Store(id='selected-county'),
@@ -56,14 +65,16 @@ app.layout = html.Div([
             [
                 dbc.Card(
                     dbc.Row([
-                        dbc.Col([dropdown,dcc.Graph(figure=plot_usa_map(counties, county_data, [["HousingScore"]]), id='map')],width={'size':8}),
-                        dbc.Col(list_group, width=4)
-                        ]
+                        dbc.Col([dropdown,dcc.Graph(figure=plot_usa_map(counties, county_data, [["HousingScore"]]), id='map')],width={'size':7}),
+                        dbc.Col(list_group)
+                        ],
+                        className='g-1'
                     )
                 ),
                 html.Br(),
                 dbc.Row([
-                    dcc.Graph(figure = plot_top_ten(county_data, [['HousingScore']]), id='top-ten')
+                    dbc.Col(dcc.Graph(figure = plot_top_ten(county_data, [['HousingScore']]), id='top-ten'),width=7),
+                    dbc.Col([html.H3(children='County Summary via Google Gemini', className='text-success'),html.P(id="ai-output")])
                     ]
                 )
             ]
@@ -86,9 +97,9 @@ def update_criteria(value):
 
 # When "map" or 'top-ten' is clicked, 'selected-county' is updated. 
 @callback(
-    Output("selected-county", 'data'),
-    [Input("top-ten", 'clickData'),
-    Input('map', 'clickData')]
+        Output("selected-county", 'data'),
+        [Input("top-ten", 'clickData'),
+        Input('map', 'clickData')]
 )
 def output_top_ten(top_ten_click, map_click):
     button_clicked = ctx.triggered_id
@@ -103,18 +114,20 @@ def output_top_ten(top_ten_click, map_click):
 
 # When "selected-county" is updated, 'county_data' is queried for row matching the fips code in "selected-county" data.
 @callback(
-    Output("county-name", 'children'),
-    Output("state-name", 'children'),
-    Output("home-values", 'children'),
-    Output("zillow-url", 'children'),
-    Output("zillow-url", 'href'),
-    Output("unemployment", 'children'),
-    Output("hhi", 'children'),
-    Output("jobs-url","children"),
-    Output("jobs-url", 'href'),
-    Output("winter-temp", 'children'),
-    Output("summer-temp", 'children'),
-    Input('selected-county', 'data')
+        Output("ai-output", 'children'),
+        Output("county-name", 'children'),
+        Output("state-name", 'children'),
+        Output("home-values", 'children'),
+        Output("zillow-url", 'children'),
+        Output("zillow-url", 'href'),
+        Output("unemployment", 'children'),
+        Output("hhi", 'children'),
+        Output("jobs-url","children"),
+        Output("jobs-url", 'href'),
+        Output("winter-temp", 'children'),
+        Output("summer-temp", 'children'),
+        Output("population", 'children'),
+        Input('selected-county', 'data')
 )
 def get_county_properties(data):
     if data:
@@ -128,10 +141,18 @@ def get_county_properties(data):
         avg_summer = f"{row['SummerAvg'].item()}°F"
         avg_winter = f"{row['WinterAvg'].item()}°F"
         jobs = row['Jobs'].item()
-        results = (county, state, avg_home, zillow, zillow, unemploy, hhi,jobs,jobs, avg_summer, avg_winter)
+        population = row['Pop_Est_July_1_2024']
+        if row['Summary'].item() != None:
+            summary = row['Summary'].item()
+        else:
+            county_data.loc[county_data['fips']==data, 'Summary'] = ai_copy(county,state)
+            summary = county_data.loc[county_data['fips']==data, 'Summary'].item()
+            county_data.to_parquet('static/greener/compiled_data.parquet')
+
+        results = (summary,county, state, avg_home, zillow, zillow, unemploy, hhi,jobs,jobs,  avg_winter,avg_summer, population)
         return results
     else:
-        return ('','','','','','','','','','','')
+        return ('','','','','','','','','','','','','')
 
 
 if __name__ == '__main__':

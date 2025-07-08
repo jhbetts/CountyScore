@@ -1,5 +1,8 @@
 import plotly.express as px
 import pandas as pd
+# from urllib import response
+from google import genai
+from google.genai import types
 
 def get_map():
     from download_data import download_data
@@ -59,3 +62,16 @@ def plot_usa_map(map, data, columns):
     fig.update_layout(margin={"r":0,"l":0,"t":0,"b":0})
     fig.update_coloraxes(showscale=False)
     return fig
+
+
+def ai_copy(county,state):
+    client = genai.Client(api_key='AIzaSyDHrNhMg06HmoLfJvYKP_Trv7lIMwfVheM')
+
+    response = client.models.generate_content(
+        model='gemini-2.5-flash', 
+        contents=f'In 100 words, give me an summary of {county} {state}. Touch on things like the largest employers, fun things to do, and scenery. Give a neutral response that does not sound like an advertisement for the county.',
+        config=types.GenerateContentConfig(
+            thinking_config=types.ThinkingConfig(thinking_budget=0)
+        )
+    )
+    return response.text
