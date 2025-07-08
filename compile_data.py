@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
+import urllib.parse
 
 def download_data(url,filename):
     from urllib.request import urlretrieve
@@ -155,6 +156,9 @@ def compile_data():
     # Possibly replace with merge
     # unemploy = unemploy[unemploy.index.isin(codes)]
     joined = joined.merge(unemploy, on='fips', how='left')
+    jobs_url_base = 'https://www.indeed.com/jobs?q=&l='
+    joined['Jobs'] = housing.apply(lambda row: f'{jobs_url_base}{row["RegionName"].replace(" ", "+")}%2C+{row['StateName']}', axis=1)
+
     joined.to_parquet('static/greener/compiled_data.parquet')
 
 compile_data()
