@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 # from urllib.parse import urlencode
 
-app = Dash(external_stylesheets=[dbc.themes.SLATE, 'static/greener/style.css'])
+app = Dash(external_stylesheets=[dbc.themes.FLATLY, 'static/greener/style.css'])
 
 counties = get_map()
 county_data = pd.read_parquet("static/greener/compiled_data.parquet")
@@ -36,26 +36,38 @@ dropdown = html.Div([
 
 list_group = dbc.ListGroup(
     [
-        dbc.ListGroupItem([html.Span(children="County"), html.Span(id='county-name', style={'float': 'right'})]),
-        dbc.ListGroupItem([html.Span(children="State"), html.Span(id='state-name', style={'float': 'right'})]),
-        dbc.ListGroupItem([html.Span(children="Population"), html.Span(id='population', style={'float': 'right'})]),
-        dbc.ListGroupItem([html.Span(children="Average Home Value"), html.Span(id='home-values', style={'float': 'right'})]),
-        dbc.ListGroupItem([html.Span(children="Zillow"), html.A(id='zillow-url', style={'float': 'right'}, target='_blank')]),
-        dbc.ListGroupItem([html.Span(children="Median Household Income"), html.Span(id='hhi', style={'float': 'right'})]),
-        dbc.ListGroupItem([html.Span(children="Unemployment"), html.Span(id='unemployment', style={'float': 'right'})]),
-        dbc.ListGroupItem([html.Span(children="Average Summer Temperature"), html.Span(id='summer-temp', style={'float': 'right'})]),
-        dbc.ListGroupItem([html.Span(children="Average Winter Temperature"), html.Span(id='winter-temp', style={'float': 'right'})]),
-        dbc.ListGroupItem([html.Span(children="Indeed"), html.A(id='jobs-url', style={'float': 'right'}, target='_blank')]),
+        dbc.ListGroupItem([html.Span(children="County", className='list-label'), html.Span(id='county-name', style={'float': 'right'})]),
+        dbc.ListGroupItem([html.Span(children="State",className='list-label'), html.Span(id='state-name', style={'float': 'right'})]),
+        dbc.ListGroupItem([html.Span(children="Population",className='list-label'), html.Span(id='population', style={'float': 'right'})]),
+        dbc.ListGroupItem([html.Span(children="Average Home Value",className='list-label'), html.Span(id='home-values', style={'float': 'right'})]),
+        dbc.ListGroupItem([html.Span(children="Zillow",className='list-label'), html.A(id='zillow-url', style={'float': 'right'}, target='_blank')]),
+        dbc.ListGroupItem([html.Span(children="Median Household Income",className='list-label'), html.Span(id='hhi', style={'float': 'right'})]),
+        dbc.ListGroupItem([html.Span(children="Unemployment",className='list-label'), html.Span(id='unemployment', style={'float': 'right'})]),
+        dbc.ListGroupItem([html.Span(children="Average Summer Temperature",className='list-label'), html.Span(id='summer-temp', style={'float': 'right'})]),
+        dbc.ListGroupItem([html.Span(children="Average Winter Temperature",className='list-label'), html.Span(id='winter-temp', style={'float': 'right'})]),
+        dbc.ListGroupItem([html.Span(children="Indeed",className='list-label'), html.A(id='jobs-url', style={'float': 'right'}, target='_blank')]),
+        dbc.ListGroupItem([html.Span(children="Summary",className='list-label'), html.Br(),html.Span(id='ai-summary', style={'float': 'right', 'minHeight': '30vh'})]),
     ],
+    flush=True,
 )
 
 info_card = dbc.Card(
-    [
+    [        
+        dbc.CardHeader(html.H3(children='County Summary', className='text-success')),
         list_group,
-        html.P(id="ai-output")
-    ]
-)
+        dbc.CardFooter(html.P("Summary by Google Gemini", className="text-success"))   
+    ],
+    style={'height': '100vh'}
 
+)
+# summary_card = dbc.Card(
+#     [    
+#         dbc.CardHeader(html.H3(children='County Summary', className='text-success')),
+#         dbc.CardBody(html.P(id="ai-output")),
+#         dbc.CardFooter(html.P("Summary by Google Gemini", className="text-success"))   
+#     ],
+#     style={'height': '40vh'}
+# )
 app.layout = html.Div([
     dcc.Store(id='selected-county'),
     dcc.Store(id='county-data'),
@@ -63,21 +75,42 @@ app.layout = html.Div([
     dbc.Container(
         html.Div(
             [
-                dbc.Card(
-                    dbc.Row([
-                        dbc.Col([dropdown,dcc.Graph(figure=plot_usa_map(counties, county_data, [["HousingScore"]]), id='map')],width={'size':7}),
-                        dbc.Col(list_group)
-                        ],
-                        className='g-1'
-                    )
-                ),
-                html.Br(),
-                dbc.Row([
-                    dbc.Col(dcc.Graph(figure = plot_top_ten(county_data, [['HousingScore']]), id='top-ten'),width=7),
-                    dbc.Col([html.H3(children='County Summary via Google Gemini', className='text-success'),html.P(id="ai-output")])
+                dbc.Row(
+                    [dbc.Col(
+                        [
+                            dropdown,
+                            html.Div(
+                            dcc.Graph(figure=plot_usa_map(counties, county_data, [["HousingScore"]]), id='map', responsive=True,style={'minHeight': '55vh',}),
+                            ),
+                            html.Div(
+                                dcc.Graph(figure = plot_top_ten(county_data, [['HousingScore']]), id='top-ten',style={'minHeight': '40vh'}),
+                            )
+                        ]
+                        ),
+                     dbc.Col(
+                         [
+                             info_card
+                         ]
+                     )
                     ]
                 )
             ]
+            # [
+            #     dbc.Card(
+            #         dbc.Row([
+            #             dbc.Col([dropdown,dcc.Graph(figure=plot_usa_map(counties, county_data, [["HousingScore"]]), id='map', responsive=True)],width={'size':7}),
+            #             dbc.Col(list_group)
+            #             ],
+            #             className='g-1'
+            #         )
+            #     ),
+            #     html.Br(),
+            #     dbc.Row([
+            #         dbc.Col(dcc.Graph(figure = plot_top_ten(county_data, [['HousingScore']]), id='top-ten'),width=7),
+            #         dbc.Col(summary_card)
+            #         ]
+            #     )
+            # ]
         ),
         fluid=True
     )
@@ -114,7 +147,7 @@ def output_top_ten(top_ten_click, map_click):
 
 # When "selected-county" is updated, 'county_data' is queried for row matching the fips code in "selected-county" data.
 @callback(
-        Output("ai-output", 'children'),
+        Output("ai-summary", 'children'),
         Output("county-name", 'children'),
         Output("state-name", 'children'),
         Output("home-values", 'children'),
@@ -141,7 +174,7 @@ def get_county_properties(data):
         avg_summer = f"{row['SummerAvg'].item()}°F"
         avg_winter = f"{row['WinterAvg'].item()}°F"
         jobs = row['Jobs'].item()
-        population = row['Pop_Est_July_1_2024']
+        population = f"{row['Pop_Est_July_1_2024'].item():,}"
         if row['Summary'].item() != None:
             summary = row['Summary'].item()
         else:
