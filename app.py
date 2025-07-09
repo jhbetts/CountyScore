@@ -46,7 +46,7 @@ list_group = dbc.ListGroup(
         dbc.ListGroupItem([html.Span(children="Average Summer Temperature",className='list-label'), html.Span(id='summer-temp', style={'float': 'right'})]),
         dbc.ListGroupItem([html.Span(children="Average Winter Temperature",className='list-label'), html.Span(id='winter-temp', style={'float': 'right'})]),
         dbc.ListGroupItem([html.Span(children="Indeed",className='list-label'), html.A(id='jobs-url', style={'float': 'right'}, target='_blank')]),
-        dbc.ListGroupItem([html.Span(children="Summary",className='list-label'), html.Br(),html.Span(id='ai-summary', style={'float': 'right', 'minHeight': '30vh'})]),
+        dbc.ListGroupItem([html.Span(children="Summary",className='list-label'), html.Br(),html.Span(id='ai-summary', style={'float': 'right',})],style={'minHeight': '40vh',}),
     ],
     flush=True,
 )
@@ -60,14 +60,6 @@ info_card = dbc.Card(
     style={'height': '100vh'}
 
 )
-# summary_card = dbc.Card(
-#     [    
-#         dbc.CardHeader(html.H3(children='County Summary', className='text-success')),
-#         dbc.CardBody(html.P(id="ai-output")),
-#         dbc.CardFooter(html.P("Summary by Google Gemini", className="text-success"))   
-#     ],
-#     style={'height': '40vh'}
-# )
 app.layout = html.Div([
     dcc.Store(id='selected-county'),
     dcc.Store(id='county-data'),

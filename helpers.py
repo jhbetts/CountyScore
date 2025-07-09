@@ -3,6 +3,7 @@ import pandas as pd
 # from urllib import response
 from google import genai
 from google.genai import types
+import os
 
 def get_map():
     from download_data import download_data
@@ -38,7 +39,7 @@ def plot_top_ten(data,columns):
                       font = {'color': '#234d2c', 'size': 20},)
     fig.update_traces(marker_color = 'rgba(35,139,69,1.0)',
                       hovertemplate="<b>%{customdata[1]}, %{customdata[2]}</b><br>"+
-                                    "<b>Score: %{customdata[3]}</b><br>")
+                                    "<b>Score: %{customdata[3]:.2f}</b><br>")
     return fig
 
 
@@ -62,18 +63,19 @@ def plot_usa_map(map, data, columns):
                             # hover_data={'fips': False, "HousingScore": False, 'Total': False},
                             custom_data=["RegionName", "StateName", "AverageHomeValue", "Houses", 'Unemployment_rate_2023', 'Median_Household_Income_2022', "WinterAvg", "SummerAvg", "fips", score['Total']])
     fig.update_traces(hovertemplate="<b>%{customdata[0]}, %{customdata[1]}</b><br>"+
-                                    "<b>Score: %{customdata[9]}</b><br>")
+                                    "<b>Score: %{customdata[9]:.2f}</b><br>")
     fig.update_layout(margin={"r":0,"l":0,"t":0,"b":0})
     fig.update_coloraxes(showscale=False)
     return fig
 
 
 def ai_copy(county,state):
-    client = genai.Client(api_key=)
+    key = os.getenv("MY_API_KEY")
+    client = genai.Client(api_key=key)
 
     response = client.models.generate_content(
         model='gemini-2.5-flash', 
-        contents=f'In 200-250 words, give me an summary of {county} {state}. Touch on things like the largest employers, fun things to do, and scenery. Give a neutral response that does not sound like an advertisement for the county.',
+        contents=f'In 150-200 words, give me an summary of {county} {state}. Touch on things like the largest employers, fun things to do, and scenery. Give a neutral response that does not sound like an advertisement for the county.',
         config=types.GenerateContentConfig(
             thinking_config=types.ThinkingConfig(thinking_budget=0)
         )

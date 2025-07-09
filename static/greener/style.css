@@ -1,0 +1,83 @@
+/* assets/style.css */
+/* Main background: soft sage green */
+body,
+.dbc {
+  background-color: #d7ddc1 !important; /* dollar bill background */
+  color: #266333 !important; /* deep green text */
+  padding: 10px;
+}
+
+/* Card backgrounds: off-white with green border */
+.card,
+.dbc .card,
+.dbc .card-header,
+.dbc .card-body,
+.dbc .card-footer {
+  background-color: #f6f7f2 !important;
+  color: #266333 !important;
+  border-color: #b7cbb2 !important;
+}
+
+/* Dropdown styling */
+.custom-dropdown .Select--multi .Select-value {
+  background-color: #3a6b4b;
+  border-color: #e5e9e3;
+  color: #fff;
+}
+.custom-dropdown .Select-menu-outer {
+  background-color: #e5e9e3;
+}
+.custom-dropdown .Select--multi {
+  background-color: #e5e9e3;
+  color: #266333;
+}
+.dash-dropdown,
+.dash-dropdown * {
+  background-color: #e5e9e3 !important;
+  color: #266333 !important;
+}
+
+/* Highlight color for dropdown options */
+.Select-menu-outer .Select-option.is-focused,
+.Select-menu-outer .Select-option:hover,
+.Select-menu-outer .Select-option.is-selected {
+  background-color: #b7cbb2 !important;
+  color: #266333 !important;
+}
+
+/* Headings and success text: deep green */
+.text-success,
+.dash-bootstrap .text-success,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #266333 !important;
+}
+
+/* Links: greenish */
+a,
+a:visited {
+  color: #3a6b4b !important;
+}
+
+/* Table backgrounds */
+.dash-table-container .dash-spreadsheet-container {
+  background-color: #e5e9e3 !important;
+  color: #266333 !important;
+}
+
+/* Optional: border radius for a softer look */
+.card,
+.dbc .card,
+.dbc .card-header,
+.dbc .card-body,
+.dbc .card-footer {
+  border-radius: 8px !important;
+}
+.list-label {
+  color: #266333;
+  font-weight: bold;
+}
