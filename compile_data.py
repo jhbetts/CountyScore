@@ -96,7 +96,6 @@ def get_pop():
 
 
 def get_map():
-    from download_data import download_data
     import json
 
     try:
