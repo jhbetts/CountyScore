@@ -19,6 +19,8 @@ dropdown = html.Div([
             {'label': "Cool Summers", 'value': 'Summer_Low_Temp_Score', 'disabled':False},
             {'label': "Warm Winters", 'value': 'Winter_High_Temp_Score', 'disabled':False},
             {'label': "Cool Winters", 'value': 'Winter_Low_Temp_Score', 'disabled':False},
+            {'label': "More Liberal", 'value': 'D_Score', 'disabled':False},
+            {'label': "More Conservative", 'value': 'R_Score', 'disabled':False},
         ],
         value = 'HousingScore',
         id='criteria-drop',
@@ -181,4 +183,4 @@ def get_county_properties(data):
 
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)

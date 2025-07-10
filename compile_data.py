@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
-from helpers import get_map, download_data
+from helpers import download_data
+import requests
 us_state_to_abbrev = {
     "Alabama": "AL",
     "Alaska": "AK",
@@ -134,6 +135,49 @@ def get_unemployment(filename, url):
     df.index.names=['fips']
     return df
 
+def get_politics(states):
+    for state in states:
+        name = next(key for key, value in us_state_to_abbrev.items() if value == state)
+        name = name.replace(' ', '-')
+        states[states==state] = name.lower()
+    states = np.delete(states, np.where(states=='district-of-columbia'))
+    counties = pd.DataFrame(columns=['fips','Name', "R_Votes", "D_Votes", "Total_Votes"])
+# define function to scrape page
+    def get_results(state):
+        url = f"https://static01.nyt.com/elections-assets/pages/data/2024-11-05/results-{state}-president.json"
+        response = requests.get(url)
+        data = response.json()
+        race = data.get('races')
+        race = race[0]
+        units = race.get("reporting_units")
+        for unit in units:
+            name = unit.get('name')
+            level= unit.get('level')
+            if level in ['county', 'township']:
+                fips = unit.get('fips_state')+unit.get('fips_county')
+                candidates=unit.get("candidates")
+                for candidate in candidates:
+                    id = candidate['nyt_id']
+                    if id == 'harris-k':
+                        d_votes = candidate['votes']['total']
+                    elif id == 'trump-d': 
+                        r_votes = candidate['votes']['total']
+                    else: pass
+                total = unit.get('total_votes')
+                counties.loc[len(counties)] = [fips,name, r_votes, d_votes, total]
+            else: pass
+    # call function on all selected states
+    for state in states:
+        get_results(state)
+    # get DC results
+    get_results('washington-dc')
+    # Some states have multiple reporting units per county. Compile those into county results using the fips.
+    counties = counties.groupby(counties['fips'], as_index=False).aggregate({'fips': 'first', 'R_Votes':"sum", 'D_Votes': 'sum', 'Total_Votes': 'sum'})
+    # Score for liberal vs conservative by dividing each parties votes by total votes.
+    counties['R_Score'] = counties['R_Votes']/counties['Total_Votes']
+    counties['D_Score'] = counties['D_Votes']/counties['Total_Votes']
+    return counties
+
 
 def compile_data():
     housing = get_homes()
@@ -157,6 +201,9 @@ def compile_data():
     pop = get_pop()
     joined = joined.merge(pop, left_on=['RegionName', "StateName"], right_on=['County', 'State'], how='left')
     joined.drop(columns=['County', 'State'], inplace=True)
+    states = joined['StateName'].unique()
+    politics = get_politics(states)
+    joined = joined.merge(politics, on='fips', how='left')
     joined.to_parquet('static/greener/compiled_data.parquet')
 
 compile_data()
