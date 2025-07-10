@@ -65,7 +65,7 @@ info_card = dbc.Card(
 app.layout = html.Div([
     dcc.Store(id='selected-county'),
     dcc.Store(id='county-data'),
-    html.H1(children="Greener", id = 'title', className='text-success'),
+    html.H1(children="Same Grass, But Greener", id = 'title', className='text-success'),
     dbc.Container(
         html.Div(
             [
