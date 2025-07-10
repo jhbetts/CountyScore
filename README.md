@@ -1,6 +1,6 @@
-# greener
+# Same Grass, But Greener
 
-Greener is a data visualization tool that lets users see the relationship between different factors based on county level data in an effort to provide users with actionable information when looking to make a move. Users can select the criteria they wish to view, and either pan around the map, selecting counties based on their shading, or select from the top ten counties shown in the bar graph beneath the map.
+*Same Grass, But Greener* is a data visualization tool that lets users see the relationship between different factors based on county level data in an effort to provide users with actionable information when looking to make a move. Users can select the criteria they wish to view, and either pan around the map, selecting counties based on their shading, or select from the top ten counties shown in the bar graph beneath the map.
 
 ## How are counties scored?
 
@@ -26,8 +26,36 @@ Data that was scored via ratio: Political Affiliation
 
 ## About the Data
 
-### Median Annual Home Values
-
-Source: [Zillow]("https://files.zillowstatic.com/research/public_csvs/zhvi/County_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv?t=1750261630")
+### Average Home Values
+Source: [Zillow Average Home Value](https://files.zillowstatic.com/research/public_csvs/zhvi/County_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv?t=1750261630)
 
 Zillow publishes monthly reports on the average home sales prices in each county in the United States. From this data I extract the most recent month's average price, scale those prices with log10, and then score them from 0-1, with 0 being the highest prices and 1 being the lowest. This inverse min-max scaling is used with the assumption that lower home prices are better when deciding where to live. 
+
+### Average Winter and Summer Temperatures
+Source: [NOAA Average Temperature Between December 2024 and February 2025](https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/county/mapping/110-tavg-202502-3.csv), [NOAA Average Temperature Between June and August 2024](https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/county/mapping/110-tavg-202408-3.csv)
+
+The National Centers for Environmental Information provides county level data as part of their "Climate at a Glance" platform. This data is downloaded in .csv format, and scored using min-max scaling to create four score values for each state: "Summer_High_Temp_Score", "Summer_Low_Temp_Score", "Winter_High_Temp_Score", and "Winter_Low_Temp_Score". This combination allows users to filter for whatever combination of winter and summer temperatures they prefer. 
+
+### Population Estimates
+Source: [2020-2024 Census Population Data](https://www2.census.gov/programs-surveys/popest/tables/2020-2024/counties/totals/co-est2024-pop.xlsx)
+
+Provided by the Census Beureau, this data contains county level population estimates for July of 2020, 2021, 2022, 2023, and 2024. From this data the most recent estimates are selected and scored via min-max scaling to create two scores: "Low_Pop_Score" and "High_Pop_Score". This allows users to choose how the population size of counties should be scored based on their preferences.
+
+### Unemployment Rate and Median Household Income
+Source: [County Level Unemployment and Household Income Data from the USDA](https://ers.usda.gov/sites/default/files/_laserfiche/DataFiles/48747/Unemployment2023.csv?v=67344)
+
+The Economic Research Service of the U.S. Department of Agriculture provides a county level unemployment and household income dataset that supplies the annual average income 2023 unemployment and 2022 median income of US counties. These two variables are then scaled using min-max scaling to create scores for each county. The unemployment score is inversed, meaning that a lower unemployment value creates a higher score.
+
+### County Political Leaning
+Source: Scraped from [The New York Times](https://www.nytimes.com/)
+
+Precinct level vote counts are scraped from the New York Times and compiled into county level totals of votes for the Democratic and Republican nominees in the 2024 Presidential Election. Total are then compared to the total number of votes cast as a ratio, which serve as the "R_Score" and "D_Score" for that county. Counties with a higher "R_Score" are said to be "More Conservative" and counties with a higher "D_Score" are said to be more conservative. 
+
+## Built with...
+<div style="display: flex; justify-content: center; align-items: flex-start; gap: 10px;">
+  <img src="https://s3.dualstack.us-east-2.amazonaws.com/pythondotorg-assets/media/files/python-logo-only.svg" height="100">
+  <img src="https://plotly-marketing-website-2.cdn.prismic.io/plotly-marketing-website-2/Z7eNlZ7c43Q3gCJw_Plotly-Logo-White.svg" height="100">
+  <img src="https://pandas.pydata.org/static/img/pandas_secondary_white.svg"height="100">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/8/8a/Google_Gemini_logo.svg"height="100">
+</div>
+
