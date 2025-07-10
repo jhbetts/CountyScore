@@ -1,12 +1,19 @@
 import plotly.express as px
 import pandas as pd
-# from urllib import response
 from google import genai
 from google.genai import types
 import os
 
+def download_data(url,filename):
+    from urllib.request import urlretrieve
+
+    try:
+        urlretrieve(url,filename)
+        print(f"File saved.")
+    except Exception as e:
+        print(f"Error downloading file: {e}")
+
 def get_map():
-    from download_data import download_data
     import json
 
     try:

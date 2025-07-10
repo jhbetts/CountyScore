@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
-
+from helpers import get_map, download_data
 us_state_to_abbrev = {
     "Alabama": "AL",
     "Alaska": "AK",
@@ -62,16 +62,6 @@ us_state_to_abbrev = {
     "Virgin Islands, U.S.": "VI",
 }
 
-
-def download_data(url,filename):
-    from urllib.request import urlretrieve
-
-    try:
-        urlretrieve(url,filename)
-        print(f"File saved.")
-    except Exception as e:
-        print(f"Error downloading file: {e}")
-
 def open_csv_data(filename, url):
     try:    
         x = pd.read_csv(filename, comment='#')
@@ -94,19 +84,6 @@ def get_pop():
     df['High_Pop_Score'] = scaler.fit_transform(np.log10(df[["Pop_Est_July_1_2024"]]))
     return df
 
-
-def get_map():
-    import json
-
-    try:
-        with open("static/greener/usa.geojson") as f:
-            counties = json.load(f)
-    except:
-        download_data('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json',
-                    "static/greener/usa.geojson")
-        with open("static/greener/usa.geojson") as f:
-            counties = json.load(f)
-    return counties
 
 def get_homes():
     housing = open_csv_data("static/greener/home_values_county.csv","https://files.zillowstatic.com/research/public_csvs/zhvi/County_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv?t=1750261630")
