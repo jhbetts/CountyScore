@@ -52,10 +52,9 @@ Source: Scraped from [The New York Times](https://www.nytimes.com/)
 Precinct level vote counts are scraped from the New York Times and compiled into county level totals of votes for the Democratic and Republican nominees in the 2024 Presidential Election. Total are then compared to the total number of votes cast as a ratio, which serve as the "R_Score" and "D_Score" for that county. Counties with a higher "R_Score" are said to be "More Conservative" and counties with a higher "D_Score" are said to be more conservative. 
 
 ## Built with...
-<div style="display: flex; justify-content: center; align-items: flex-start; gap: 10px;">
-  <img src="https://s3.dualstack.us-east-2.amazonaws.com/pythondotorg-assets/media/files/python-logo-only.svg" height="100">
-  <img src="https://plotly-marketing-website-2.cdn.prismic.io/plotly-marketing-website-2/Z7eNlZ7c43Q3gCJw_Plotly-Logo-White.svg" height="100">
-  <img src="https://pandas.pydata.org/static/img/pandas_secondary_white.svg"height="100">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/8/8a/Google_Gemini_logo.svg"height="100">
-</div>
-
+<p align="center">
+  <img src="https://s3.dualstack.us-east-2.amazonaws.com/pythondotorg-assets/media/files/python-logo-only.svg" height="100" style="padding: 0 10px; vertical-align: middle;">
+  <img src="https://plotly-marketing-website-2.cdn.prismic.io/plotly-marketing-website-2/Z7eNlZ7c43Q3gCJw_Plotly-Logo-White.svg" height="100" style="padding: 0 10px; vertical-align: middle;">
+  <img src="https://pandas.pydata.org/static/img/pandas_secondary_white.svg" height="100" style="padding: 0 10px; vertical-align: middle;">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/8/8a/Google_Gemini_logo.svg" height="100" style="padding: 0 10px; vertical-align: middle;">
+</p>
