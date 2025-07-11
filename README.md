@@ -53,8 +53,8 @@ Precinct level vote counts are scraped from the New York Times and compiled into
 
 ## Built with...
 <p align="center">
-  <img src="https://s3.dualstack.us-east-2.amazonaws.com/pythondotorg-assets/media/files/python-logo-only.svg" height="100" style="padding: 0 10px; vertical-align: middle;">
+  <img src="static/greener/python-logo-only.svg" height="100" style="padding: 0 10px; vertical-align: middle;">
   <img src="https://plotly-marketing-website-2.cdn.prismic.io/plotly-marketing-website-2/Z7eNlZ7c43Q3gCJw_Plotly-Logo-White.svg" height="100" style="padding: 0 10px; vertical-align: middle;">
   <img src="https://pandas.pydata.org/static/img/pandas_secondary_white.svg" height="100" style="padding: 0 10px; vertical-align: middle;">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/8/8a/Google_Gemini_logo.svg" height="100" style="padding: 0 10px; vertical-align: middle;">
+  <img src="static/greener/Google_Gemini_logo.svg" height="100" style="padding: 0 10px; vertical-align: middle;">
 </p>
