@@ -91,7 +91,7 @@ tab1_content =dbc.Card(
                                         type="circle",
                                         custom_spinner=dbc.Spinner(color="#266333")
                                     )
-                                ]
+                                ],
                             )
                             ]
                         )
@@ -277,4 +277,4 @@ def get_county_properties(data):
 
 if __name__ == '__main__':
     app.title = "Same Grass, But Greener"
-    app.run(debug=True)
+    app.run(debug=False)
