@@ -62,35 +62,6 @@ info_card = dbc.Card(
     style={'height': '100vh'}
 )
 
-# tab1_content =dbc.Card(
-#         dbc.Container(
-#                 html.Div(
-#                     [
-#                         dbc.Row(
-#                             [dbc.Col(
-#                                 [
-#                                     dropdown,
-#                                     html.Div(
-#                                     dcc.Graph(figure=plot_usa_map(counties, county_data, [["HousingScore"]]), id='map', responsive=True,style={'minHeight': '55vh',}),
-#                                     ),
-#                                     html.Div(
-#                                         dcc.Graph(figure = plot_top_ten(county_data, [['HousingScore']]), id='top-ten',style={'minHeight': '40vh'}),
-#                                     )
-#                                 ]
-#                                 ),
-#                             dbc.Col(
-#                                 [
-#                                     info_card
-#                                 ]
-#                             )
-#                             ]
-#                         )
-#                     ]
-#                 ),
-#                 style={'padding': '25px'},
-#                 fluid=True
-#             )
-#         )
 tab1_content =dbc.Card(
         dbc.Container(
                 html.Div(
@@ -305,4 +276,5 @@ def get_county_properties(data):
 
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.title = "Same Grass, But Greener"
+    app.run(debug=True)

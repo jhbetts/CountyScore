@@ -3,6 +3,8 @@ import pandas as pd
 from google import genai
 from google.genai import types
 import os
+import json
+
 
 def download_data(url,filename):
     from urllib.request import urlretrieve
@@ -14,8 +16,6 @@ def download_data(url,filename):
         print(f"Error downloading file: {e}")
 
 def get_map():
-    import json
-
     try:
         with open("static/greener/usa.geojson") as f:
             counties = json.load(f)
@@ -51,7 +51,6 @@ def plot_top_ten(data,columns):
 
 
 def plot_usa_map(map, data, columns):
-
     dummy_columns = ['HousingScore', 'IncomeScore']
     if columns[0]:
         score = pd.DataFrame()
