@@ -62,6 +62,35 @@ info_card = dbc.Card(
     style={'height': '100vh'}
 )
 
+# tab1_content =dbc.Card(
+#         dbc.Container(
+#                 html.Div(
+#                     [
+#                         dbc.Row(
+#                             [dbc.Col(
+#                                 [
+#                                     dropdown,
+#                                     html.Div(
+#                                     dcc.Graph(figure=plot_usa_map(counties, county_data, [["HousingScore"]]), id='map', responsive=True,style={'minHeight': '55vh',}),
+#                                     ),
+#                                     html.Div(
+#                                         dcc.Graph(figure = plot_top_ten(county_data, [['HousingScore']]), id='top-ten',style={'minHeight': '40vh'}),
+#                                     )
+#                                 ]
+#                                 ),
+#                             dbc.Col(
+#                                 [
+#                                     info_card
+#                                 ]
+#                             )
+#                             ]
+#                         )
+#                     ]
+#                 ),
+#                 style={'padding': '25px'},
+#                 fluid=True
+#             )
+#         )
 tab1_content =dbc.Card(
         dbc.Container(
                 html.Div(
@@ -71,7 +100,12 @@ tab1_content =dbc.Card(
                                 [
                                     dropdown,
                                     html.Div(
-                                    dcc.Graph(figure=plot_usa_map(counties, county_data, [["HousingScore"]]), id='map', responsive=True,style={'minHeight': '55vh',}),
+                                        dcc.Loading(
+                                            dcc.Graph(figure=plot_usa_map(counties, county_data, [["HousingScore"]]), id='map', responsive=True,style={'minHeight': '55vh',}),
+                                            overlay_style={"visibility":"visible", "filter": "blur(2px)"},
+                                            type="circle",
+                                            custom_spinner=dbc.Spinner(color="#b7cbb2")
+                                        )
                                     ),
                                     html.Div(
                                         dcc.Graph(figure = plot_top_ten(county_data, [['HousingScore']]), id='top-ten',style={'minHeight': '40vh'}),
@@ -80,7 +114,12 @@ tab1_content =dbc.Card(
                                 ),
                             dbc.Col(
                                 [
-                                    info_card
+                                    dcc.Loading(
+                                        info_card,
+                                        overlay_style={"visibility":"visible", "filter": "blur(2px)"},
+                                        type="circle",
+                                        custom_spinner=dbc.Spinner(color="#266333")
+                                    )
                                 ]
                             )
                             ]
@@ -91,6 +130,7 @@ tab1_content =dbc.Card(
                 fluid=True
             )
         )
+
 
 tab2_content = dbc.Card(
     html.Div(
