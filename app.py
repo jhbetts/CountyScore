@@ -21,6 +21,8 @@ dropdown = html.Div([
             {'label': "Cool Winters", 'value': 'Winter_Low_Temp_Score', 'disabled':False},
             {'label': "More Liberal", 'value': 'D_Score', 'disabled':False},
             {'label': "More Conservative", 'value': 'R_Score', 'disabled':False},
+            {'label': "More Populated", 'value': 'High_Pop_Score', 'disabled':False},
+            {'label': "Less Populated", 'value': 'Low_Pop_Score', 'disabled':False},
         ],
         value = 'HousingScore',
         id='criteria-drop',

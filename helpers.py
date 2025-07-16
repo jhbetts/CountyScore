@@ -61,7 +61,7 @@ def plot_usa_map(map, data, columns):
 
     fig = px.choropleth_map(data, geojson=map, locations="fips", color=score['Total'],
                             color_continuous_scale='greens',
-                            map_style='carto-darkmatter-nolabels',
+                            map_style='carto-positron-nolabels',
                             zoom=3, center={'lat': 37.0902, 'lon': -95.7129},
                             opacity=1.0,
                             title="Average Home Value By County", 
@@ -81,7 +81,7 @@ def ai_copy(county,state):
 
     response = client.models.generate_content(
         model='gemini-2.5-flash', 
-        contents=f'In 150-200 words, give me an summary of {county} {state}. Touch on things like the largest employers, fun things to do, and scenery. Give a neutral response that does not sound like an advertisement for the county.',
+        contents=f'In 150-200 words, give me an summary of {county} {state}. Touch on things like the largest employers, fun things to do, and scenery. Include the nearest city of more than 50,000. Give a neutral response that does not sound like an advertisement for the county.',
         config=types.GenerateContentConfig(
             thinking_config=types.ThinkingConfig(thinking_budget=0)
         )
