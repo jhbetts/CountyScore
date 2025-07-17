@@ -61,7 +61,7 @@ info_card = dbc.Card(
         list_group,
         dbc.CardFooter(html.P("Summary by Google Gemini", className="text-success"))   
     ],
-    style={'height': '100vh'}
+    style={'height': 'auto', "minHeight": "100%"}
 )
 
 tab1_content =dbc.Card(
@@ -70,20 +70,21 @@ tab1_content =dbc.Card(
                     [
                         dbc.Row(
                             [dbc.Col(
-                                [
-                                    dropdown,
-                                    html.Div(
-                                        dcc.Loading(
-                                            dcc.Graph(figure=plot_usa_map(counties, county_data, [["HousingScore"]]), id='map', responsive=True,style={'minHeight': '55vh',}),
-                                            overlay_style={"visibility":"visible", "filter": "blur(2px)"},
-                                            type="circle",
-                                            custom_spinner=dbc.Spinner(color="#b7cbb2")
+                                    [
+                                        dropdown,
+                                        html.Div(
+                                            dcc.Loading(
+                                                dcc.Graph(figure=plot_usa_map(counties, county_data, [["HousingScore"]]), id='map', responsive=True,style={'minHeight': '55vh',}),
+                                                overlay_style={"visibility":"visible", "filter": "blur(2px)"},
+                                                type="circle",
+                                                custom_spinner=dbc.Spinner(color="#b7cbb2")
+                                            )
+                                        ),
+                                        html.Div(
+                                            dcc.Graph(figure = plot_top_ten(county_data, [['HousingScore']]), id='top-ten',style={'minHeight': '40vh'}),
                                         )
-                                    ),
-                                    html.Div(
-                                        dcc.Graph(figure = plot_top_ten(county_data, [['HousingScore']]), id='top-ten',style={'minHeight': '40vh'}),
-                                    )
-                                ]
+                                    ],
+                                    xs=12, md=12, lg=7
                                 ),
                             dbc.Col(
                                 [
@@ -94,13 +95,16 @@ tab1_content =dbc.Card(
                                         custom_spinner=dbc.Spinner(color="#266333")
                                     )
                                 ],
+                                xs=12, md=12, lg=5,
+                                style={"display": "flex", "flexDirection": "column"}
                             )
                             ]
                         )
                     ]
                 ),
                 style={'padding': '25px'},
-                fluid=True
+                fluid=True,
+               
             )
         )
 
@@ -167,12 +171,18 @@ tab2_content = dbc.Card(
                 ),
                 html.Div(
                     [
-                        html.Img(src="/static/greener/python-logo-only.svg", style={'max-height': '100px','padding': '0px 0px 0px 0px'}),
-                        html.Img(src="https://plotly-marketing-website-2.cdn.prismic.io/plotly-marketing-website-2/Z7eNlJ7c43Q3gCJv_Plotly-Logo-Black.svg",style={'max-height': '150px', 'padding-bottom': "10px"}),
-                        html.Img(src="https://pandas.pydata.org/static/img/pandas.svg",style={'max-height': '150px'}),
-                        html.Img(src="https://upload.wikimedia.org/wikipedia/commons/8/8a/Google_Gemini_logo.svg",style={'max-height': '100px', 'padding': '0px 0px 30px 50px'}),
+                        html.Img(src="/static/greener/python-logo-only.svg", style={'maxWidth': '20vw', 'height': 'auto', 'margin': '10px'}),
+                        html.Img(src="https://plotly-marketing-website-2.cdn.prismic.io/plotly-marketing-website-2/Z7eNlJ7c43Q3gCJv_Plotly-Logo-Black.svg", style={'maxWidth': '25vw', 'height': 'auto', 'margin': '10px'}),
+                        html.Img(src="https://pandas.pydata.org/static/img/pandas.svg", style={'maxWidth': '25vw', 'height': 'auto', 'margin': '10px'}),
+                        html.Img(src="https://upload.wikimedia.org/wikipedia/commons/8/8a/Google_Gemini_logo.svg", style={'maxWidth': '20vw', 'height': 'auto', 'margin': '10px'}),
                     ],
-                    style={ "display": "flex", "justify-content": "center", "align-items": "center"}
+                    style={
+                        "display": "flex",
+                        "justifyContent": "center",
+                        "alignItems": "center",
+                        "flexWrap": "wrap",
+                        "gap": "10px"
+                    }
                 )
         ],        
         style={'padding': '25px'}
@@ -211,7 +221,8 @@ app.layout = html.Div([
 @callback(
         Output("map",'figure'),
         Output("top-ten", 'figure'),
-        Input("criteria-drop", 'value')
+        Input("criteria-drop", 'value'),
+        prevent_initial_call=True
 )
 def update_criteria(value):
     value = value

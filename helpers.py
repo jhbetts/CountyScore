@@ -64,7 +64,6 @@ def plot_usa_map(map, data, columns):
                             map_style='carto-positron-nolabels',
                             zoom=3, center={'lat': 37.0902, 'lon': -95.7129},
                             opacity=1.0,
-                            title="Average Home Value By County", 
                             # hover_name="RegionName",
                             # hover_data={'fips': False, "HousingScore": False, 'Total': False},
                             custom_data=["RegionName", "StateName", "AverageHomeValue", "Houses", 'Unemployment_rate_2023', 'Median_Household_Income_2022', "WinterAvg", "SummerAvg", "fips", score['Total']])
