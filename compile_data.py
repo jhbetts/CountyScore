@@ -87,15 +87,15 @@ def get_pop():
 
 
 def get_homes():
-    housing = open_csv_data("static/greener/home_values_county.csv","https://files.zillowstatic.com/research/public_csvs/zhvi/County_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv?t=1750261630")
+    housing = open_csv_data("static/county_score/home_values_county.csv","https://files.zillowstatic.com/research/public_csvs/zhvi/County_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv?t=1750261630")
     
     # Ensure StateCodeFIPS is in two digit format and MunicipalCodeFIPS is in 3 digit format.
     housing["StateCodeFIPS"] = housing["StateCodeFIPS"].apply(lambda x: str(x).zfill(2))
     housing["MunicipalCodeFIPS"] = housing['MunicipalCodeFIPS'].apply(lambda x: str(x).zfill(3))
 
     # Combine State and Municipal FIPS codes to get a 5 digit FIPS code.
-    housing.insert(0,"fips",(housing["StateCodeFIPS"] + housing["MunicipalCodeFIPS"])) 
-    housing["fips"]= housing["StateCodeFIPS"] + housing["MunicipalCodeFIPS"]
+    housing.insert(0,"Fips",(housing["StateCodeFIPS"] + housing["MunicipalCodeFIPS"])) 
+    housing["Fips"]= housing["StateCodeFIPS"] + housing["MunicipalCodeFIPS"]
     # Rename most recent column to "AverageHomeValue" so code is usable with updated csv files.
     housing = housing.rename(columns={housing.columns[-1]:"AverageHomeValue"})
 
@@ -103,7 +103,7 @@ def get_homes():
     housing['AverageHomeValue'] = housing['AverageHomeValue'].astype(np.float32)
 
     # Select only used columns
-    housing = housing[['fips', 'StateName', "RegionName", 'AverageHomeValue']]
+    housing = housing[['Fips', 'StateName', "RegionName", 'AverageHomeValue']]
 
     # Normalize the values in a new column.
     scaler = MinMaxScaler()
@@ -132,7 +132,7 @@ def get_unemployment(filename, url):
     scaler = MinMaxScaler()
     df['IncomeScore'] = scaler.fit_transform(np.log10(df[['Median_Household_Income_2022']]))
     df['UnemploymentScore'] = 1 - scaler.fit_transform(np.log10(df[['Unemployment_rate_2023']]))
-    df.index.names=['fips']
+    df.index.names=['Fips']
     return df
 
 def get_politics(states):
@@ -141,9 +141,9 @@ def get_politics(states):
         name = name.replace(' ', '-')
         states[states==state] = name.lower()
     states = np.delete(states, np.where(states=='district-of-columbia'))
-    counties = pd.DataFrame(columns=['fips','Name', "R_Votes", "D_Votes", "Total_Votes"])
+    counties = pd.DataFrame(columns=['Fips','Name', "R_Votes", "D_Votes", "Total_Votes"])
 # define function to scrape page
-    def get_results(state):
+    def get_results(state: str):
         url = f"https://static01.nyt.com/elections-assets/pages/data/2024-11-05/results-{state}-president.json"
         response = requests.get(url)
         data = response.json()
@@ -154,7 +154,7 @@ def get_politics(states):
             name = unit.get('name')
             level= unit.get('level')
             if level in ['county', 'township']:
-                fips = unit.get('fips_state')+unit.get('fips_county')
+                Fips = unit.get('fips_state')+unit.get('fips_county')
                 candidates=unit.get("candidates")
                 for candidate in candidates:
                     id = candidate['nyt_id']
@@ -164,15 +164,15 @@ def get_politics(states):
                         r_votes = candidate['votes']['total']
                     else: pass
                 total = unit.get('total_votes')
-                counties.loc[len(counties)] = [fips,name, r_votes, d_votes, total]
+                counties.loc[len(counties)] = [Fips, name, r_votes, d_votes, total]
             else: pass
     # call function on all selected states
     for state in states:
         get_results(state)
     # get DC results
     get_results('washington-dc')
-    # Some states have multiple reporting units per county. Compile those into county results using the fips.
-    counties = counties.groupby(counties['fips'], as_index=False).aggregate({'fips': 'first', 'R_Votes':"sum", 'D_Votes': 'sum', 'Total_Votes': 'sum'})
+    # Some states have multiple reporting units per county. Compile those into county results using the Fips.
+    counties = counties.groupby(counties['Fips'], as_index=False).aggregate({'Fips': 'first', 'R_Votes':"sum", 'D_Votes': 'sum', 'Total_Votes': 'sum'})
     # Score for liberal vs conservative by dividing each parties votes by total votes.
     counties['R_Score'] = counties['R_Votes']/counties['Total_Votes']
     counties['D_Score'] = counties['D_Votes']/counties['Total_Votes']
@@ -181,20 +181,20 @@ def get_politics(states):
 
 def compile_data():
     housing = get_homes()
-    winter = get_temps("static/greener/dec_feb_temps.csv",
+    winter = get_temps("static/county_score/dec_feb_temps.csv",
                         "https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/county/mapping/110-tavg-202412-3.csv")
     winter.rename(columns={"Value":"WinterAvg", "High_Temp_Score": "Winter_High_Temp_Score", "Low_Temp_Score": "Winter_Low_Temp_Score"}, inplace=True)
-    summer = get_temps("static/greener/jun_aug_temps.csv",
+    summer = get_temps("static/county_score/jun_aug_temps.csv",
                     "https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/county/mapping/110-tavg-202408-3.csv")
     summer.rename(columns={"Value": "SummerAvg", "High_Temp_Score": "Summer_High_Temp_Score", "Low_Temp_Score": "Summer_Low_Temp_Score"}, inplace=True)
     winter = winter.merge(summer)
     joined = pd.merge(housing, winter, right_on=["Name", 'State'], left_on=['RegionName', 'StateName'], how='left')
     joined.drop(columns=['Name', 'State'], inplace=True)
-    codes = joined['fips'].unique()
-    unemploy = get_unemployment('static/greener/unemployment_hhi_2000-23.csv',"https://ers.usda.gov/sites/default/files/_laserfiche/DataFiles/48747/Unemployment2023.csv?v=67344")
+    # codes = joined['Fips'].unique()
+    unemploy = get_unemployment('static/county_score/unemployment_hhi_2000-23.csv',"https://ers.usda.gov/sites/default/files/_laserfiche/DataFiles/48747/Unemployment2023.csv?v=67344")
     # Possibly replace with merge
     # unemploy = unemploy[unemploy.index.isin(codes)]
-    joined = joined.merge(unemploy, on='fips', how='left')
+    joined = joined.merge(unemploy, on='Fips', how='left')
     jobs_url_base = 'https://www.indeed.com/jobs?q=&l='
     joined['Jobs'] = housing.apply(lambda row: f'{jobs_url_base}{row["RegionName"].replace(" ", "+")}%2C+{row['StateName']}', axis=1)
     joined['Summary']=None
@@ -203,7 +203,8 @@ def compile_data():
     joined.drop(columns=['County', 'State'], inplace=True)
     states = joined['StateName'].unique()
     politics = get_politics(states)
-    joined = joined.merge(politics, on='fips', how='left')
-    joined.to_parquet('static/greener/compiled_data.parquet')
+    joined = joined.merge(politics, on='Fips', how='left')
+    joined['Selected'] = None
+    joined.to_parquet('static/county_score/compiled_data.parquet')
 
 compile_data()

@@ -4,10 +4,11 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 # from urllib.parse import urlencode
 
-app = Dash(external_stylesheets=[dbc.themes.FLATLY, 'static/greener/style.css'])
+app = Dash(external_stylesheets=[dbc.themes.FLATLY, 'static/county_score/style.css'])
 
 counties = get_map()
-county_data = pd.read_parquet("static/greener/compiled_data.parquet")
+county_data = pd.read_parquet("static/county_score/compiled_data.parquet")
+county_data['Selected'] = None
 
 dropdown = html.Div([
     dcc.Dropdown(
@@ -115,7 +116,7 @@ tab2_content = dbc.Card(
             dcc.Markdown('''
                     ## About
 
-                    *Same Grass, But Greener* is a data visualization tool that lets users see the relationship between different factors based on county level data in an effort to provide users with actionable information when looking to make a move. Users can select the criteria they wish to view, and either pan around the map, selecting counties based on their shading, or select from the top ten counties shown in the bar graph beneath the map.
+                    *CountyScore* is a data visualization tool that lets users see the relationship between different factors based on county level data in an effort to provide users with actionable information when looking to make a move. Users can select the criteria they wish to view, and either pan around the map, selecting counties based on their shading, or select from the top ten counties shown in the bar graph beneath the map.
 
                     ### How are counties scored?
 
@@ -171,7 +172,7 @@ tab2_content = dbc.Card(
                 ),
                 html.Div(
                     [
-                        html.Img(src="/static/greener/python-logo-only.svg", style={'maxWidth': '20vw', 'height': 'auto', 'margin': '10px'}),
+                        html.Img(src="/static/county_score/python-logo-only.svg", style={'maxWidth': '20vw', 'height': 'auto', 'margin': '10px'}),
                         html.Img(src="https://plotly-marketing-website-2.cdn.prismic.io/plotly-marketing-website-2/Z7eNlJ7c43Q3gCJv_Plotly-Logo-Black.svg", style={'maxWidth': '25vw', 'height': 'auto', 'margin': '10px'}),
                         html.Img(src="https://pandas.pydata.org/static/img/pandas.svg", style={'maxWidth': '25vw', 'height': 'auto', 'margin': '10px'}),
                         html.Img(src="https://upload.wikimedia.org/wikipedia/commons/8/8a/Google_Gemini_logo.svg", style={'maxWidth': '20vw', 'height': 'auto', 'margin': '10px'}),
@@ -194,12 +195,12 @@ app.layout = html.Div([
     dcc.Store(id='county-data'),
     html.Div(
         [
-            html.H1(children="Same Grass, But Greener", id = 'title', className='text-success'),
+            html.H1(children="CountyScore", id = 'title', className='text-success fw-bolder'),
             html.A(
                 [
-                    html.Img(src="static/greener/GitHub_Invertocat_Dark.svg", style={'max-height': '50px','padding': '0px 0px 0px 0px','min-height': '50px'})
+                    html.Img(src="static/county_score/GitHub_Invertocat_Dark.svg", style={'max-height': '50px','padding': '0px 0px 0px 0px','min-height': '50px'})
                 ],
-                href = "https://github.com/jhbetts/greener",
+                href = "https://github.com/jhbetts/county_score",
                 target='_blank'
                 ),
         ],
@@ -215,18 +216,18 @@ app.layout = html.Div([
     ], className = 'dbc'
 )
 
-# html.Img(src="static/greener/GitHub_Invertocat_Dark.svg", style={'max-height': '50px','padding': '0px 0px 0px 0px',})
+# html.Img(src="static/county_score/GitHub_Invertocat_Dark.svg", style={'max-height': '50px','padding': '0px 0px 0px 0px',})
 
 # Dropdown
 @callback(
         Output("map",'figure'),
         Output("top-ten", 'figure'),
         Input("criteria-drop", 'value'),
+        Input("selected-county", 'data'),
         prevent_initial_call=True
 )
-def update_criteria(value):
-    value = value
-    return (plot_usa_map(counties, county_data, [value]), plot_top_ten(county_data, [value]))
+def update_criteria(dropdown_value, selected=None):
+    return (plot_usa_map(counties, county_data, [dropdown_value],selected), plot_top_ten(county_data, [dropdown_value],))
 
 # When "map" or 'top-ten' is clicked, 'selected-county' is updated. 
 @callback(
@@ -264,7 +265,7 @@ def output_top_ten(top_ten_click, map_click):
 )
 def get_county_properties(data):
     if data:
-        row = county_data[county_data['fips']==data]
+        row = county_data[county_data['Fips']==data]
         county = row['RegionName'].item()
         state = row['StateName'].item()
         avg_home = f"${row['AverageHomeValue'].item():,.2f}"
@@ -278,9 +279,9 @@ def get_county_properties(data):
         if row['Summary'].item() != None:
             summary = row['Summary'].item()
         else:
-            county_data.loc[county_data['fips']==data, 'Summary'] = ai_copy(county,state)
-            summary = county_data.loc[county_data['fips']==data, 'Summary'].item()
-            county_data.to_parquet('static/greener/compiled_data.parquet')
+            county_data.loc[county_data['Fips']==data, 'Summary'] = ai_copy(county,state)
+            summary = county_data.loc[county_data['Fips']==data, 'Summary'].item()
+            county_data.to_parquet('static/county_score/compiled_data.parquet')
 
         results = (summary,county, state, avg_home, zillow, zillow, unemploy, hhi,jobs,jobs,  avg_winter,avg_summer, population)
         return results
@@ -289,5 +290,5 @@ def get_county_properties(data):
 
 
 if __name__ == '__main__':
-    app.title = "Same Grass, But Greener"
+    app.title = "CountyScore"
     app.run(debug=False)

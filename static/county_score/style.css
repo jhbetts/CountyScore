@@ -2,7 +2,7 @@
 /* Main background: soft sage green */
 body,
 .dbc {
-  background-color: #d7ddc1 !important; /* dollar bill background */
+  background-color: #d4dadc  !important; /* page background */
   color: #266333 !important; /* deep green text */
   padding: 10px;
 }
@@ -13,7 +13,7 @@ body,
 .dbc .card-header,
 .dbc .card-body,
 .dbc .card-footer {
-  background-color: #f6f7f2 !important;
+  background-color: #fafaf8  !important;
   color: #266333 !important;
   border-color: #b7cbb2 !important;
 }
@@ -28,7 +28,7 @@ body,
   background-color: #e5e9e3;
 }
 .custom-dropdown .Select--multi {
-  background-color: #e5e9e3;
+  background-color: #fafaf8 ;
   color: #266333;
 }
 .dash-dropdown,

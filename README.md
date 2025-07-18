@@ -1,6 +1,6 @@
-# Same Grass, But Greener
+# CountyScore
 
-*Same Grass, But Greener* is a data visualization tool that lets users see the relationship between different factors based on county level data in an effort to provide users with actionable information when looking to make a move. Users can select the criteria they wish to view, and either pan around the map, selecting counties based on their shading, or select from the top ten counties shown in the bar graph beneath the map.
+*CountyScore* is a data visualization tool that lets users see the relationship between different factors based on county level data in an effort to provide users with actionable information when looking to make a move. Users can select the criteria they wish to view, and either pan around the map, selecting counties based on their shading, or select from the top ten counties shown in the bar graph beneath the map.
 
 ## How are counties scored?
 
@@ -53,8 +53,8 @@ Precinct level vote counts are scraped from the New York Times and compiled into
 
 ## Built with...
 <p align="center">
-  <img src="static/greener/python-logo-only.svg" height="100" style="padding: 0 10px; vertical-align: middle;">
+  <img src="static/county_score/python-logo-only.svg" height="100" style="padding: 0 10px; vertical-align: middle;">
   <img src="https://plotly-marketing-website-2.cdn.prismic.io/plotly-marketing-website-2/Z7eNlZ7c43Q3gCJw_Plotly-Logo-White.svg" height="100" style="padding: 0 10px; vertical-align: middle;">
   <img src="https://pandas.pydata.org/static/img/pandas_secondary_white.svg" height="100" style="padding: 0 10px; vertical-align: middle;">
-  <img src="static/greener/Google_Gemini_logo.svg" height="100" style="padding: 0 10px; vertical-align: middle;">
+  <img src="static/county_score/Google_Gemini_logo.svg" height="100" style="padding: 0 10px; vertical-align: middle;">
 </p>

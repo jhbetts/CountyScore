@@ -17,12 +17,12 @@ def download_data(url,filename):
 
 def get_map():
     try:
-        with open("static/greener/usa.geojson") as f:
+        with open("static/county_score/usa.geojson") as f:
             counties = json.load(f)
     except:
         download_data('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json',
-                    "static/greener/usa.geojson")
-        with open("static/greener/usa.geojson") as f:
+                    "static/county_score/usa.geojson")
+        with open("static/county_score/usa.geojson") as f:
             counties = json.load(f)
     return counties
 
@@ -33,10 +33,10 @@ def plot_top_ten(data,columns):
     else: 
         score = pd.DataFrame()
         score['Score'] = [0]* data.shape[0]
-    score = score.merge(data[['fips','RegionName', 'StateName']], left_index=True, right_index=True, how='inner')
+    score = score.merge(data[['Fips','RegionName', 'StateName']], left_index=True, right_index=True, how='inner')
     top_ten = score.sort_values('Score', ascending=False).head(10)
-    fig = px.bar(top_ten, x = 'fips', y = 'Score', labels={"fips": "Top Ten Counties"},
-                custom_data=['fips', 'RegionName', "StateName", 'Score'],
+    fig = px.bar(top_ten, x = 'Fips', y = 'Score', labels={"Fips": "Top Ten Counties"},
+                custom_data=['Fips', 'RegionName', "StateName", 'Score'],
 
                 )
     fig.update_xaxes(showticklabels=False)
@@ -50,7 +50,8 @@ def plot_top_ten(data,columns):
     return fig
 
 
-def plot_usa_map(map, data, columns):
+def plot_usa_map(map, data, columns, selected=None):
+    import plotly.graph_objects as go
     dummy_columns = ['HousingScore', 'IncomeScore']
     if columns[0]:
         score = pd.DataFrame()
@@ -58,17 +59,32 @@ def plot_usa_map(map, data, columns):
     else: 
         score = pd.DataFrame()
         score['Total'] = [0]* data.shape[0]
-
-    fig = px.choropleth_map(data, geojson=map, locations="fips", color=score['Total'],
+    if selected:
+        data['Selected'] = None
+        data.loc[data['Fips'] == selected, 'Selected'] = 1
+    fig = px.choropleth_map(data, geojson=map, locations="Fips", color=score['Total'],
                             color_continuous_scale='greens',
                             map_style='carto-positron-nolabels',
                             zoom=3, center={'lat': 37.0902, 'lon': -95.7129},
                             opacity=1.0,
-                            # hover_name="RegionName",
-                            # hover_data={'fips': False, "HousingScore": False, 'Total': False},
-                            custom_data=["RegionName", "StateName", "AverageHomeValue", "Houses", 'Unemployment_rate_2023', 'Median_Household_Income_2022', "WinterAvg", "SummerAvg", "fips", score['Total']])
+                            custom_data=["RegionName", 
+                                         "StateName", 
+                                         "AverageHomeValue", 
+                                         "Houses", 
+                                         'Unemployment_rate_2023', 
+                                         'Median_Household_Income_2022', 
+                                         "WinterAvg", 
+                                         "SummerAvg", 
+                                         "Fips", 
+                                         score['Total']])
     fig.update_traces(hovertemplate="<b>%{customdata[0]}, %{customdata[1]}</b><br>"+
                                     "<b>Score: %{customdata[9]:.2f}</b><br>")
+    fig.add_trace(go.Choroplethmap(geojson=map, locations=data["Fips"], z= data['Selected'],
+                        colorscale = [[0, 'green'],[.5,'red'],[1, 'green']],
+                        marker_opacity=1.,
+                        showscale=False
+                            )
+                        )
     fig.update_layout(margin={"r":0,"l":0,"t":0,"b":0})
     fig.update_coloraxes(showscale=False)
     return fig
@@ -80,7 +96,9 @@ def ai_copy(county,state):
 
     response = client.models.generate_content(
         model='gemini-2.5-flash', 
-        contents=f'In 150-200 words, give me an summary of {county} {state}. Touch on things like the largest employers, fun things to do, and scenery. Include the nearest city of more than 50,000. Give a neutral response that does not sound like an advertisement for the county.',
+        contents=f'''In 150-200 words, give me an summary of {county} {state}. Touch on things like the largest employers,
+        fun things to do, and scenery. Include the nearest city of more than 50,000. 
+        Give a neutral response that does not sound like an advertisement for the county.''',
         config=types.GenerateContentConfig(
             thinking_config=types.ThinkingConfig(thinking_budget=0)
         )
