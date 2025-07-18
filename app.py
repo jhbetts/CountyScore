@@ -224,9 +224,11 @@ app.layout = html.Div([
         Output("top-ten", 'figure'),
         Input("criteria-drop", 'value'),
         Input("selected-county", 'data'),
-        prevent_initial_call=True
+        # prevent_initial_call=True
 )
 def update_criteria(dropdown_value, selected=None):
+    if type(dropdown_value)==str:
+        dropdown_value = [dropdown_value]
     return (plot_usa_map(counties, county_data, [dropdown_value],selected), plot_top_ten(county_data, [dropdown_value],))
 
 # When "map" or 'top-ten' is clicked, 'selected-county' is updated. 
@@ -291,4 +293,4 @@ def get_county_properties(data):
 
 if __name__ == '__main__':
     app.title = "CountyScore"
-    app.run(debug=False)
+    app.run(debug=True)

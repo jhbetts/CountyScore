@@ -104,3 +104,4 @@ def ai_copy(county,state):
         )
     )
     return response.text
+
